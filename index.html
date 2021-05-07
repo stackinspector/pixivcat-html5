@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="zh-cmn-Hans">
+
+<head>
+    <!-- HTML5 User Interface Page for Pixiv.Cat -->
+    <!-- Copyright 2021 stackinspector. MIT Lincese. -->
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="renderer" content="webkit">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pixiv图片获取</title>
+    <style>
+        body {
+            text-align: center;
+            font-family: -apple-system, BlinkMacSystemFont, Helvetica Neue, PingFang SC, Microsoft YaHei, Source Han Sans SC, Noto Sans CJK SC, WenQuanYi Micro Hei, sans-serif;
+        }
+
+        div#app {
+            margin: 0 auto;
+            max-width: 350px;
+        }
+
+        div#app * {
+            width: 100%;
+        }
+
+        div#viewplace img {
+            max-width: 100%;
+            height: auto;
+        }
+
+        button#submit {
+            width: 100px;
+        }
+
+        span#pending,
+        span#failed {
+            display: none;
+        }
+
+        p#footer {
+            bottom: 0;
+            color: #999;
+            font-size: small;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Pixiv图片获取</h1>
+
+    <div id="app">
+        <form id="input" onsubmit="return false">
+            <input type="text" name="pid" placeholder="输入Pixiv ID">
+            <input type="text" name="num" placeholder="可选：如果有多张图，输入要获取的图片编号，用逗号隔开">
+        </form>
+        <p>
+            <button id="submit" onclick="append()">获取</button>
+            <span id="pending">&nbsp;下载中</span>
+            <span id="failed">&nbsp;获取图片时出错</span>
+        </p>
+        <div id="viewplace"></div>
+    </div>
+
+    <p id="footer">基于Pixiv.Cat接口</p>
+
+    <script>
+        /**
+         * change the visibility of an element with the specified id
+         * @param {string} id target element id
+         * @param {boolean} state `true` for `inline` and `false` for `none`
+         * @returns {void}
+         */
+        const change = (id, state) => {
+            document.getElementById(id).style.display = state ? "inline" : "none"
+        }
+        /**
+         * download the `target` image and append it to the `viewplace`
+         * @param {string} target the target image
+         * @returns {void}
+         */
+        const download = target => {
+            change("pending", true)
+            fetch(`https://pixiv.cat/${target}.jpg`)
+                .then(resp => resp.blob())
+                .then(blob => {
+                    change("pending", false)
+                    const view = document.createElement("img")
+                    view.src = URL.createObjectURL(blob)
+                    document.getElementById("viewplace").appendChild(view)
+                })
+                .catch(error => {
+                    change("pending", false)
+                    change("failed", true)
+                })
+        }
+        /**
+         * handle input and information display
+         * @returns {void}
+         */
+        const append = () => {
+            const pid = Number(document.getElementById("input").pid.value)
+            const num = document.getElementById("input").num.value.split(",").map(Number)
+            num.length === 1 && num[0] === 0
+                ? download(pid)
+                : num.map(n => download(`${pid}-${n}`))
+            change("failed", false)
+        }
+    </script>
+</body>
+
+</html>
