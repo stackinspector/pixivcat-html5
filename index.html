@@ -50,12 +50,12 @@
     <h1>Pixiv图片获取</h1>
 
     <div id="app">
-        <form id="input" onsubmit="return false">
+        <form id="input">
             <input type="text" name="pid" placeholder="输入Pixiv ID">
             <input type="text" name="num" placeholder="可选：如果有多张图，输入要获取的图片编号，用逗号隔开">
         </form>
         <p>
-            <button id="submit" onclick="append()">获取</button>
+            <button id="submit">获取</button>
             <span id="pending">&nbsp;下载中</span>
             <span id="failed">&nbsp;获取图片时出错</span>
         </p>
@@ -65,6 +65,7 @@
     <p id="footer">基于Pixiv.Cat接口</p>
 
     <script>
+        document.getElementById("input").onsubmit = () => false
         /**
          * change the visibility of an element with the specified id
          * @param {string} id target element id
@@ -106,6 +107,7 @@
                 : num.map(n => download(`${pid}-${n}`))
             change("failed", false)
         }
+        document.getElementById("submit").onclick = append
     </script>
 </body>
 
